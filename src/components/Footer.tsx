@@ -45,18 +45,18 @@ export default function Footer() {
             <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Quick Links</h4>
             <ul className="space-y-2.5">
               {[
-                { label: 'About Us', href: '#about' },
-                { label: 'Academics', href: '#academics' },
-                { label: 'Admissions', href: '#admissions' },
-                { label: 'Events & News', href: '#events' },
-                { label: 'Photo Gallery', href: '#gallery' },
-                { label: 'Contact Us', href: '#contact' },
+                { label: 'About Us', href: '/about' },
+                { label: 'Academics', href: '/academics' },
+                { label: 'Admissions', href: '/admissions' },
+                { label: 'Events & News', href: '/events' },
+                { label: 'Photo Gallery', href: '/gallery' },
+                { label: 'Contact Us', href: '/contact' },
               ].map((l) => (
                 <li key={l.label}>
-                  <a href={l.href} className="text-sm text-white/60 hover:text-white transition-colors flex items-center gap-1.5">
+                  <Link href={l.href} className="text-sm text-white/60 hover:text-white transition-colors flex items-center gap-1.5">
                     <Icon name="ChevronRightIcon" size={12} className="text-primary" />
                     {l.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -75,10 +75,10 @@ export default function Footer() {
                 'Co-curricular Activities',
               ].map((item) => (
                 <li key={item}>
-                  <a href="#academics" className="text-sm text-white/60 hover:text-white transition-colors flex items-center gap-1.5">
+                  <Link href="/academics" className="text-sm text-white/60 hover:text-white transition-colors flex items-center gap-1.5">
                     <Icon name="ChevronRightIcon" size={12} className="text-primary" />
                     {item}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -120,8 +120,8 @@ export default function Footer() {
             © 2026 Greenwood Academy. All rights reserved.
           </p>
           <div className="flex items-center gap-5">
-            <a href="#" className="text-sm text-white/40 hover:text-white/70 transition-colors">Privacy Policy</a>
-            <a href="#" className="text-sm text-white/40 hover:text-white/70 transition-colors">Terms of Use</a>
+            <Link href="/privacy-policy" className="text-sm text-white/40 hover:text-white/70 transition-colors">Privacy Policy</Link>
+            <Link href="/terms-of-use" className="text-sm text-white/40 hover:text-white/70 transition-colors">Terms of Use</Link>
             <Link href="/demo-dashboard" className="text-sm text-white/40 hover:text-white/70 transition-colors">Student Portal</Link>
           </div>
         </div>

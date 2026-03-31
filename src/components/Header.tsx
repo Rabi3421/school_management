@@ -6,11 +6,11 @@ import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 
 const navLinks = [
-  { label: 'About', href: '#about' },
-  { label: 'Academics', href: '#academics' },
-  { label: 'Admissions', href: '#admissions' },
-  { label: 'Events', href: '#events' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'About', href: '/about' },
+  { label: 'Academics', href: '/academics' },
+  { label: 'Admissions', href: '/admissions' },
+  { label: 'Events', href: '/events' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export default function Header() {
@@ -54,13 +54,13 @@ export default function Header() {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-7">
           {navLinks?.map((link) => (
-            <a
+            <Link
               key={link?.label}
               href={link?.href}
               className={`text-sm font-medium transition-colors duration-200 ${scrolled ? 'text-muted hover:text-primary' : 'text-white/80 hover:text-white'}`}
             >
               {link?.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -96,14 +96,14 @@ export default function Header() {
         <div className="md:hidden bg-white/98 backdrop-blur-xl border-b border-border shadow-card">
           <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks?.map((link) => (
-              <a
+              <Link
                 key={link?.label}
                 href={link?.href}
                 className="px-4 py-3 text-sm font-medium text-muted hover:text-primary hover:bg-primary/5 rounded-xl transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 {link?.label}
-              </a>
+              </Link>
             ))}
             <div className="pt-2 flex flex-col gap-2 border-t border-border mt-2">
               <Link
