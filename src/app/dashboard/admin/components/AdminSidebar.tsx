@@ -82,7 +82,7 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen }: Props) {
             <div className="text-2xs text-muted">Principal / Admin</div>
           </div>
         </div>
-        <button onClick={logout} className="sidebar-link w-full text-danger hover:bg-danger/8">
+        <button onClick={() => logout()} className="sidebar-link w-full text-danger hover:bg-danger/8">
           <Icon name="ArrowRightOnRectangleIcon" size={18} />
           Sign Out
         </button>

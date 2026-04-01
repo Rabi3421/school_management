@@ -43,9 +43,8 @@ const notices = [
 
 export default function StudentOverview() {
   const { user } = useAuth();
-  const isParent = user?.role === 'parent';
-  const displayName = isParent ? user?.childName : user?.name;
-  const displayGrade = isParent ? user?.childGrade : `Grade ${user?.grade}${user?.section}`;
+  const displayName = user?.name;
+  const displayGrade = user?.grade ? `Grade ${user.grade}${user.section ?? ''}` : 'Student';
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -53,7 +52,7 @@ export default function StudentOverview() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl sm:text-2xl font-700 text-foreground">
-            {isParent ? `${displayName}'s Dashboard` : 'My Dashboard'}
+            My Dashboard
           </h1>
           <p className="text-sm text-muted mt-0.5">{displayGrade} · Greenwood Academy · Tue, 31 Mar 2026</p>
         </div>

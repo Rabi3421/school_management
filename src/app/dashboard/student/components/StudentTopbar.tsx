@@ -68,7 +68,7 @@ export default function StudentTopbar({ setSidebarOpen }: Props) {
           </div>
           <div className="hidden sm:block">
             <div className="text-sm font-600 text-foreground leading-tight">{user?.name}</div>
-            <div className="text-2xs text-muted capitalize">{user?.role === 'parent' ? 'Parent' : `Grade ${user?.grade}${user?.section}`}</div>
+            <div className="text-2xs text-muted capitalize">{user?.grade ? `Grade ${user.grade}${user.section ?? ''}` : 'Student'}</div>
           </div>
         </div>
       </div>

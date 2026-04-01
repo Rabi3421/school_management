@@ -10,7 +10,7 @@ export default function AdminDashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <DashboardGuard allowed={['admin']}>
+    <DashboardGuard allowed={['principal']}>
       <div className="flex h-screen bg-background overflow-hidden">
         <AdminSidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         {sidebarOpen && (

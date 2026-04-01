@@ -4,16 +4,27 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
-export default function DashboardGuard({ children, allowed }: { children: React.ReactNode; allowed: string[] }) {
+interface Props {
+  children: React.ReactNode;
+  allowed: string[];  // e.g. ['student'] | ['teacher'] | ['principal']
+}
+
+export default function DashboardGuard({ children, allowed }: Props) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) router.replace('/login');
-    if (!loading && user && !allowed.includes(user.role)) router.replace('/login');
+    if (loading) return;
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
+    if (!allowed.includes(user.role)) {
+      router.replace('/login');
+    }
   }, [user, loading, allowed, router]);
 
-  if (loading || !user) {
+  if (loading || !user || !allowed.includes(user.role)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">

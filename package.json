@@ -39,6 +39,7 @@
     "warning": "🚨 CRITICAL: DO NOT REMOVE OR MODIFY ABOVE DEPENDENCIES - Required for Next.js 15 TypeScript app functionality"
   },
   "scripts": {
+    "seed": "tsx scripts/seed.ts",
     "dev": "next dev -p 4028",
     "build": "next build",
     "start": "next dev -p 4028",
@@ -53,6 +54,11 @@
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
+    "bcryptjs": "^3.0.3",
+    "cookie": "^1.1.1",
+    "jose": "^6.2.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.3.3",
     "next": "15.1.11",
     "react": "19.0.3",
     "react-dom": "19.0.3",
@@ -61,12 +67,15 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@netlify/plugin-nextjs": "^5.11.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "19.0.3",
     "@types/react-dom": "19.0.3",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
     "autoprefixer": "10.4.2",
+    "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "^15.2.4",
     "eslint-config-prettier": "^10.1.1",
@@ -75,6 +84,7 @@
     "prettier": "^3.5.3",
     "tailwindcss": "3.4.6",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

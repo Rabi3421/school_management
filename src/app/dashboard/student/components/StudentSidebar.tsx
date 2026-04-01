@@ -53,7 +53,7 @@ export default function StudentSidebar({ sidebarOpen, setSidebarOpen }: Props) {
           <div className="min-w-0">
             <div className="text-xs font-700 text-foreground truncate">{user?.name}</div>
             <div className="text-2xs text-muted capitalize">
-              {user?.role === 'student' ? `Grade ${user.grade}${user.section} · ${user.rollNumber}` : `Parent · ${user?.childGrade}`}
+              {user?.grade ? `Grade ${user.grade}${user.section ?? ''} · ${user.rollNumber ?? ''}` : 'Student'}
             </div>
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function StudentSidebar({ sidebarOpen, setSidebarOpen }: Props) {
       {/* Logout */}
       <div className="px-3 py-4 border-t border-border/50">
         <button
-          onClick={logout}
+          onClick={() => logout()}
           className="sidebar-link w-full text-danger hover:bg-danger/8"
         >
           <Icon name="ArrowRightOnRectangleIcon" size={18} />

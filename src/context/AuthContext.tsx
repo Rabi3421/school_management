@@ -1,99 +1,161 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  ReactNode,
+} from 'react';
 import { useRouter } from 'next/navigation';
 
-export type UserRole = 'student' | 'parent' | 'teacher' | 'admin';
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export type UserRole = 'student' | 'teacher' | 'principal';
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
   role: UserRole;
-  avatar?: string;
-  // role-specific
-  grade?: string;       // student
-  section?: string;     // student
-  rollNumber?: string;  // student
-  subject?: string;     // teacher
-  department?: string;  // teacher / admin
-  childName?: string;   // parent
-  childGrade?: string;  // parent
+  // Student
+  grade?: string;
+  section?: string;
+  rollNumber?: string;
+  // Teacher / Principal
+  subject?: string;
+  department?: string;
+  phone?: string;
 }
 
-const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
-  'student@demo.com': {
-    id: 'std-001', name: 'Arjun Sharma', email: 'student@demo.com', password: 'demo123',
-    role: 'student', grade: '10', section: 'A', rollNumber: 'SR-0451',
-  },
-  'parent@demo.com': {
-    id: 'par-001', name: 'Suresh Sharma', email: 'parent@demo.com', password: 'demo123',
-    role: 'parent', childName: 'Arjun Sharma', childGrade: 'Grade 10A',
-  },
-  'teacher@demo.com': {
-    id: 'tch-001', name: 'Meera Iyer', email: 'teacher@demo.com', password: 'demo123',
-    role: 'teacher', subject: 'Mathematics', department: 'Science & Maths',
-  },
-  'admin@demo.com': {
-    id: 'adm-001', name: 'Rajesh Sharma', email: 'admin@demo.com', password: 'demo123',
-    role: 'admin', department: 'Administration',
-  },
-};
-
-const ROLE_REDIRECTS: Record<UserRole, string> = {
-  student: '/dashboard/student',
-  parent: '/dashboard/student',
-  teacher: '/dashboard/teacher',
-  admin: '/dashboard/admin',
+export const ROLE_REDIRECTS: Record<UserRole, string> = {
+  student:   '/dashboard/student',
+  teacher:   '/dashboard/teacher',
+  principal: '/dashboard/admin',
 };
 
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  login:  (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
 }
+
+// ── Context ───────────────────────────────────────────────────────────────────
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+// Access token: 2h. Refresh 5 min before expiry = every 115 min
+const REFRESH_INTERVAL_MS = (2 * 60 - 5) * 60 * 1000;
 
-  useEffect(() => {
-    const stored = sessionStorage.getItem('school_auth_user');
-    if (stored) {
-      try { setUser(JSON.parse(stored)); } catch {}
+// ── Provider ─────────────────────────────────────────────────────────────────
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser]       = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router                = useRouter();
+  const refreshTimerRef       = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const silentRefresh = useCallback(async (): Promise<AuthUser | null> => {
+    try {
+      const res = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.user as AuthUser;
+    } catch {
+      return null;
     }
-    setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const record = DEMO_USERS[email.toLowerCase()];
-    if (!record || record.password !== password) {
-      return { success: false, error: 'Invalid email or password.' };
+  const scheduleRefresh = useCallback((refresh: () => Promise<AuthUser | null>) => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(async () => {
+      const refreshed = await refresh();
+      if (refreshed) {
+        setUser(refreshed);
+        scheduleRefresh(refresh);
+      } else {
+        setUser(null);
+      }
+    }, REFRESH_INTERVAL_MS);
+  }, []);
+
+  const cancelRefresh = useCallback(() => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
     }
-    const { password: _pw, ...authUser } = record;
-    setUser(authUser);
-    sessionStorage.setItem('school_auth_user', JSON.stringify(authUser));
-    router.push(ROLE_REDIRECTS[authUser.role]);
-    return { success: true };
-  };
+  }, []);
 
-  const logout = () => {
+  // Bootstrap on mount
+  useEffect(() => {
+    const bootstrap = async () => {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user as AuthUser);
+          scheduleRefresh(silentRefresh);
+          setLoading(false);
+          return;
+        }
+      } catch {}
+
+      // Access token gone — try refresh token
+      const refreshed = await silentRefresh();
+      if (refreshed) {
+        setUser(refreshed);
+        scheduleRefresh(silentRefresh);
+      }
+      setLoading(false);
+    };
+
+    bootstrap();
+    return cancelRefresh;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const res = await fetch('/api/auth/login', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email, password }),
+          credentials: 'include',
+        });
+        const data = await res.json();
+        if (!res.ok) return { success: false, error: data.error ?? 'Login failed.' };
+        const loggedInUser = data.user as AuthUser;
+        setUser(loggedInUser);
+        scheduleRefresh(silentRefresh);
+        router.push(ROLE_REDIRECTS[loggedInUser.role]);
+        return { success: true };
+      } catch {
+        return { success: false, error: 'Network error. Please try again.' };
+      }
+    },
+    [router, scheduleRefresh, silentRefresh]
+  );
+
+  const logout = useCallback(async () => {
+    cancelRefresh();
+    try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch {}
     setUser(null);
-    sessionStorage.removeItem('school_auth_user');
     router.push('/login');
-  };
+  }, [cancelRefresh, router]);
 
-  return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error('useAuth must be inside <AuthProvider>');
   return ctx;
 }
-
-export { ROLE_REDIRECTS };

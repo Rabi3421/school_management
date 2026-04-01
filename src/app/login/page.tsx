@@ -6,27 +6,26 @@ import { useAuth, UserRole } from '@/context/AuthContext';
 import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 
-const roles: { value: UserRole; label: string; icon: string; color: string; bg: string; demo: string }[] = [
-  { value: 'student', label: 'Student', icon: 'AcademicCapIcon', color: 'text-primary', bg: 'bg-primary/10 border-primary/30', demo: 'student@demo.com' },
-  { value: 'parent', label: 'Parent', icon: 'HomeIcon', color: 'text-violet-600', bg: 'bg-violet-50 border-violet-200', demo: 'parent@demo.com' },
-  { value: 'teacher', label: 'Teacher', icon: 'UserGroupIcon', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200', demo: 'teacher@demo.com' },
-  { value: 'admin', label: 'Principal / Admin', icon: 'BuildingLibraryIcon', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', demo: 'admin@demo.com' },
+const roles: { value: UserRole; label: string; icon: string; color: string; bg: string; demoEmail: string }[] = [
+  { value: 'student',   label: 'Student',          icon: 'AcademicCapIcon',      color: 'text-primary',      bg: 'bg-primary/10 border-primary/30',    demoEmail: 'student@demo.com' },
+  { value: 'teacher',   label: 'Teacher',           icon: 'UserGroupIcon',        color: 'text-emerald-600',  bg: 'bg-emerald-50 border-emerald-200',   demoEmail: 'teacher@demo.com' },
+  { value: 'principal', label: 'Principal / Admin', icon: 'BuildingLibraryIcon',  color: 'text-amber-600',    bg: 'bg-amber-50 border-amber-200',       demoEmail: 'principal@demo.com' },
 ];
 
 export default function LoginPage() {
   const { login } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserRole>('student');
-  const [email, setEmail] = useState('student@demo.com');
-  const [password, setPassword] = useState('demo123');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [email,    setEmail]    = useState('student@demo.com');
+  const [password, setPassword] = useState('Demo@1234');
+  const [showPass, setShowPass] = useState(false);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState('');
 
   const handleRoleSelect = (role: UserRole) => {
     const r = roles.find((r) => r.value === role)!;
     setSelectedRole(role);
-    setEmail(r.demo);
-    setPassword('demo123');
+    setEmail(r.demoEmail);
+    setPassword('Demo@1234');
     setError('');
   };
 
@@ -43,7 +42,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg, #0A0F2E 0%, #0F2A7A 50%, #1C4ED8 80%, #0EA5E9 100%)' }}>
-      {/* Left panel — branding */}
+      {/* Left branding panel */}
       <div className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 p-12 text-white">
         <div className="flex items-center gap-3">
           <AppLogo size={40} />
@@ -61,15 +60,13 @@ export default function LoginPage() {
             </span>
           </h1>
           <p className="text-white/70 leading-relaxed mb-10 text-sm">
-            A unified platform for students, parents, teachers, and administrators to stay connected with school life.
+            A unified platform for students, teachers, and administrators to stay connected with school life.
           </p>
-
           <div className="space-y-4">
             {[
-              { icon: 'AcademicCapIcon', text: 'Students — view grades, timetable & attendance' },
-              { icon: 'HomeIcon', text: 'Parents — track your child\'s progress' },
-              { icon: 'UserGroupIcon', text: 'Teachers — manage classes & assessments' },
-              { icon: 'BuildingLibraryIcon', text: 'Admins — complete school oversight' },
+              { icon: 'AcademicCapIcon',     text: 'Students — view grades, timetable & attendance' },
+              { icon: 'UserGroupIcon',        text: 'Teachers — manage classes & assessments' },
+              { icon: 'BuildingLibraryIcon',  text: 'Principal — complete school oversight & reports' },
             ].map((item) => (
               <div key={item.text} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
@@ -81,12 +78,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="text-xs text-white/40">
-          © 2026 Greenwood Academy · <Link href="/privacy-policy" className="hover:text-white/70 transition-colors">Privacy Policy</Link>
-        </div>
+        <p className="text-xs text-white/40">
+          © 2026 Greenwood Academy ·{' '}
+          <Link href="/privacy-policy" className="hover:text-white/70 transition-colors">Privacy Policy</Link>
+        </p>
       </div>
 
-      {/* Right panel — form */}
+      {/* Right form panel */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
           {/* Mobile logo */}
@@ -102,31 +100,28 @@ export default function LoginPage() {
           <p className="text-sm text-muted mb-6">Select your role and enter your credentials.</p>
 
           {/* Role selector */}
-          <div className="grid grid-cols-2 gap-2 mb-6">
+          <div className="grid grid-cols-3 gap-2 mb-6">
             {roles.map((r) => (
               <button
                 key={r.value}
                 type="button"
                 onClick={() => handleRoleSelect(r.value)}
-                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all duration-150 ${
+                className={`flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border text-center transition-all duration-150 ${
                   selectedRole === r.value ? r.bg : 'bg-background border-border hover:border-border'
                 }`}
               >
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${selectedRole === r.value ? r.bg : 'bg-white'}`}>
-                  <Icon name={r.icon as 'AcademicCapIcon'} size={14} className={selectedRole === r.value ? r.color : 'text-muted'} />
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedRole === r.value ? r.bg : 'bg-white border border-border'}`}>
+                  <Icon name={r.icon as 'AcademicCapIcon'} size={16} className={selectedRole === r.value ? r.color : 'text-muted'} />
                 </div>
-                <span className={`text-xs font-600 ${selectedRole === r.value ? r.color : 'text-muted'}`}>{r.label}</span>
-                {selectedRole === r.value && (
-                  <Icon name="CheckCircleIcon" size={14} className={`ml-auto shrink-0 ${r.color}`} />
-                )}
+                <span className={`text-2xs font-600 leading-tight ${selectedRole === r.value ? r.color : 'text-muted'}`}>{r.label}</span>
               </button>
             ))}
           </div>
 
           {/* Demo hint */}
-          <div className="flex items-start gap-2 px-3 py-2.5 bg-primary/5 rounded-xl border border-primary/15 text-xs text-muted mb-6">
+          <div className="flex items-start gap-2 px-3 py-2.5 bg-primary/5 rounded-xl border border-primary/15 text-xs text-muted mb-5">
             <Icon name="InformationCircleIcon" size={14} className="text-primary mt-0.5 shrink-0" />
-            <span>Demo credentials auto-filled. Just click <strong className="text-foreground">Sign In</strong> to continue.</span>
+            <span>Demo credentials are pre-filled. Just click <strong className="text-foreground">Sign In</strong>.</span>
           </div>
 
           {error && (
@@ -142,7 +137,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); setError(''); }}
                 required
                 className="w-full px-4 py-3 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
                 placeholder="you@school.edu.in"
@@ -152,19 +147,15 @@ export default function LoginPage() {
               <label className="block text-xs font-600 text-foreground mb-1.5">Password</label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPass ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); setError(''); }}
                   required
                   className="w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
                   placeholder="••••••••"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
-                >
-                  <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
+                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors">
+                  <Icon name={showPass ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
                 </button>
               </div>
             </div>
@@ -176,14 +167,14 @@ export default function LoginPage() {
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
                   Signing in…
                 </>
               ) : (
-                <>
-                  Sign In
-                  <Icon name="ArrowRightIcon" size={15} />
-                </>
+                <>Sign In <Icon name="ArrowRightIcon" size={15} /></>
               )}
             </button>
           </form>

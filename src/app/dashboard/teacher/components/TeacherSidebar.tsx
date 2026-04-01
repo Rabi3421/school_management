@@ -71,7 +71,7 @@ export default function TeacherSidebar({ sidebarOpen, setSidebarOpen }: Props) {
       </nav>
 
       <div className="px-3 py-4 border-t border-border/50">
-        <button onClick={logout} className="sidebar-link w-full text-danger hover:bg-danger/8">
+        <button onClick={() => logout()} className="sidebar-link w-full text-danger hover:bg-danger/8">
           <Icon name="ArrowRightOnRectangleIcon" size={18} />
           Sign Out
         </button>
