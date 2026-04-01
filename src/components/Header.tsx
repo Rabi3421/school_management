@@ -67,11 +67,11 @@ export default function Header() {
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
           <Link
-            href="/demo-dashboard"
+            href="/login"
             className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${scrolled ? 'text-primary hover:text-primary-dark' : 'text-white/80 hover:text-white'}`}
           >
             <Icon name="LockClosedIcon" size={14} />
-            Student Portal
+            Portal Login
           </Link>
           <a
             href="#admissions"
@@ -107,11 +107,11 @@ export default function Header() {
             ))}
             <div className="pt-2 flex flex-col gap-2 border-t border-border mt-2">
               <Link
-                href="/demo-dashboard"
+                href="/login"
                 className="px-4 py-3 text-sm font-medium text-primary text-center border border-primary/20 rounded-xl hover:bg-primary/5 transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
-                Student Portal
+                Portal Login
               </Link>
               <a
                 href="#admissions"
