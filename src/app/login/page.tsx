@@ -7,9 +7,10 @@ import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 
 const roles: { value: UserRole; label: string; icon: string; color: string; bg: string; demoEmail: string }[] = [
-  { value: 'student',   label: 'Student',          icon: 'AcademicCapIcon',      color: 'text-primary',      bg: 'bg-primary/10 border-primary/30',    demoEmail: 'student@demo.com' },
-  { value: 'teacher',   label: 'Teacher',           icon: 'UserGroupIcon',        color: 'text-emerald-600',  bg: 'bg-emerald-50 border-emerald-200',   demoEmail: 'teacher@demo.com' },
-  { value: 'principal', label: 'Principal / Admin', icon: 'BuildingLibraryIcon',  color: 'text-amber-600',    bg: 'bg-amber-50 border-amber-200',       demoEmail: 'principal@demo.com' },
+  { value: 'student',    label: 'Student',       icon: 'AcademicCapIcon',      color: 'text-primary',     bg: 'bg-primary/10 border-primary/30',    demoEmail: 'student@demo.com'    },
+  { value: 'teacher',    label: 'Teacher',        icon: 'UserGroupIcon',        color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200',   demoEmail: 'teacher@demo.com'    },
+  { value: 'principal',  label: 'Principal',      icon: 'BuildingLibraryIcon',  color: 'text-amber-600',   bg: 'bg-amber-50 border-amber-200',       demoEmail: 'principal@demo.com'  },
+  { value: 'superadmin', label: 'Super Admin',    icon: 'ShieldCheckIcon',      color: 'text-rose-600',    bg: 'bg-rose-50 border-rose-200',         demoEmail: 'schoolsuperadmin@gmail.com' },
 ];
 
 export default function LoginPage() {
@@ -25,7 +26,7 @@ export default function LoginPage() {
     const r = roles.find((r) => r.value === role)!;
     setSelectedRole(role);
     setEmail(r.demoEmail);
-    setPassword('Demo@1234');
+    setPassword(role === 'superadmin' ? 'schoolsuperadmin123' : 'Demo@1234');
     setError('');
   };
 
@@ -100,7 +101,7 @@ export default function LoginPage() {
           <p className="text-sm text-muted mb-6">Select your role and enter your credentials.</p>
 
           {/* Role selector */}
-          <div className="grid grid-cols-3 gap-2 mb-6">
+          <div className="grid grid-cols-4 gap-2 mb-6">
             {roles.map((r) => (
               <button
                 key={r.value}

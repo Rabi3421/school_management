@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type UserRole = 'student' | 'teacher' | 'principal';
+export type UserRole = 'student' | 'teacher' | 'principal' | 'superadmin';
 
 export interface AuthUser {
   id: string;
@@ -31,9 +31,10 @@ export interface AuthUser {
 }
 
 export const ROLE_REDIRECTS: Record<UserRole, string> = {
-  student:   '/dashboard/student',
-  teacher:   '/dashboard/teacher',
-  principal: '/dashboard/admin',
+  student:    '/dashboard/student',
+  teacher:    '/dashboard/teacher',
+  principal:  '/dashboard/admin',
+  superadmin: '/dashboard/superadmin',
 };
 
 interface AuthContextType {

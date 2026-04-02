@@ -28,7 +28,7 @@ const UserSchema = new mongoose.Schema(
     name:          { type: String, required: true },
     email:         { type: String, required: true, unique: true, lowercase: true },
     passwordHash:  { type: String, required: true },
-    role:          { type: String, enum: ['student', 'teacher', 'principal'], required: true },
+    role:          { type: String, enum: ['student', 'teacher', 'principal', 'superadmin'], required: true },
     grade:         String,
     section:       String,
     rollNumber:    String,
@@ -45,6 +45,7 @@ const User = mongoose.models.User || mongoose.model('User', UserSchema);
 // ── Demo users ────────────────────────────────────────────────────────────────
 
 const DEMO_PASSWORD = 'Demo@1234';
+const SUPERADMIN_PASSWORD = 'schoolsuperadmin123';
 
 const demoUsers = [
   {
@@ -71,6 +72,13 @@ const demoUsers = [
     department:  'Administration',
     phone:       '+91 99001 10003',
   },
+  {
+    name:        'School Super Admin',
+    email:       'schoolsuperadmin@gmail.com',
+    role:        'superadmin',
+    department:  'Platform Administration',
+    phone:       '+91 99001 10004',
+  },
 ];
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -80,9 +88,23 @@ async function seed() {
   await mongoose.connect(MONGODB_URI, { bufferCommands: false });
   console.log('✅  Connected\n');
 
-  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
+  const demoHash       = await bcrypt.hash(DEMO_PASSWORD, 12);
+  const superadminHash  = await bcrypt.hash(SUPERADMIN_PASSWORD, 12);
 
   for (const u of demoUsers) {
+    const passwordHash = u.role === 'superadmin' ? superadminHash : demoHash;
+
+    // For superadmin: delete any old superadmin accounts first, then recreate
+    if (u.role === 'superadmin') {
+      const deleted = await User.deleteMany({ role: 'superadmin' });
+      if (deleted.deletedCount > 0) {
+        console.log(`🗑   Removed ${deleted.deletedCount} old superadmin account(s)`);
+      }
+      await User.create({ ...u, passwordHash, isActive: true });
+      console.log(`✅  ${u.role.padEnd(10)} ${u.email} — created`);
+      continue;
+    }
+
     const existing = await User.findOne({ email: u.email });
     if (existing) {
       console.log(`⏭   ${u.role.padEnd(10)} ${u.email} — already exists, skipping`);
@@ -95,9 +117,10 @@ async function seed() {
 
   console.log('\n🌱  Seed complete!');
   console.log(`\nDemo credentials (all roles):`);
-  console.log(`  student@demo.com   / Demo@1234`);
-  console.log(`  teacher@demo.com   / Demo@1234`);
-  console.log(`  principal@demo.com / Demo@1234`);
+  console.log(`  student@demo.com             / Demo@1234`);
+  console.log(`  teacher@demo.com             / Demo@1234`);
+  console.log(`  principal@demo.com           / Demo@1234`);
+  console.log(`  schoolsuperadmin@gmail.com   / schoolsuperadmin123`);
 
   await mongoose.disconnect();
 }
