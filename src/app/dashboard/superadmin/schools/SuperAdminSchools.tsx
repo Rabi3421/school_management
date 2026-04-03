@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import Icon from '@/components/ui/AppIcon';
+import ThemePicker from './ThemePicker';
+import { ThemeId, THEMES, getTheme } from '@/themes';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type SchoolStatus = 'active' | 'suspended' | 'trial';
@@ -10,6 +12,7 @@ type BoardType = 'CBSE' | 'ICSE' | 'State Board' | 'IB' | 'Cambridge';
 interface School {
   id: number;
   name: string;
+  domain: string;
   code: string;
   city: string;
   state: string;
@@ -24,6 +27,7 @@ interface School {
   lastActive: string;
   email: string;
   phone: string;
+  theme: ThemeId;
 }
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
@@ -31,6 +35,7 @@ const SCHOOLS: School[] = [
   {
     id: 1,
     name: 'Greenwood Academy',
+    domain: 'greenwood.schoolsync.in',
     code: 'GWA-001',
     city: 'Mumbai',
     state: 'Maharashtra',
@@ -45,10 +50,12 @@ const SCHOOLS: School[] = [
     lastActive: 'Just now',
     email: 'info@greenwood.edu.in',
     phone: '+91 22 4001 9900',
+    theme: 'royal',
   },
   {
     id: 2,
     name: 'Sunrise International School',
+    domain: 'sunrise.schoolsync.in',
     code: 'SIS-002',
     city: 'Pune',
     state: 'Maharashtra',
@@ -63,10 +70,12 @@ const SCHOOLS: School[] = [
     lastActive: '2 hours ago',
     email: 'admin@sunrise.edu',
     phone: '+91 20 2601 4400',
+    theme: 'emerald',
   },
   {
     id: 3,
     name: 'Lotus Public School',
+    domain: 'lotus.schoolsync.in',
     code: 'LPS-003',
     city: 'Bangalore',
     state: 'Karnataka',
@@ -81,10 +90,12 @@ const SCHOOLS: School[] = [
     lastActive: 'Yesterday',
     email: 'contact@lotus.school',
     phone: '+91 80 3901 5500',
+    theme: 'sunrise',
   },
   {
     id: 4,
     name: 'Springfield High School',
+    domain: 'springfield.schoolsync.in',
     code: 'SHS-004',
     city: 'Delhi',
     state: 'Delhi',
@@ -99,6 +110,7 @@ const SCHOOLS: School[] = [
     lastActive: '18 days ago',
     email: 'info@springfield.edu',
     phone: '+91 11 4501 6600',
+    theme: 'midnight',
   },
 ];
 
@@ -120,17 +132,21 @@ const EMPTY_FORM = {
   name: '', code: '', city: '', state: '', board: 'CBSE' as BoardType,
   status: 'active' as SchoolStatus, principal: '', principalEmail: '',
   email: '', phone: '', subscription: 'basic' as School['subscription'],
+  theme: 'aurora' as ThemeId,
+  domain: '',
 };
 
 // ─── Detail Panel ─────────────────────────────────────────────────────────────
-function SchoolDetailPanel({ school, onClose, onEdit, onToggleStatus }: {
+function SchoolDetailPanel({ school, onClose, onEdit, onToggleStatus, onChangeTheme }: {
   school: School;
   onClose: () => void;
   onEdit: () => void;
   onToggleStatus: () => void;
+  onChangeTheme: () => void;
 }) {
   const st = STATUS_CONFIG[school.status];
   const sb = SUB_CONFIG[school.subscription];
+  const th = getTheme(school.theme);
   return (
     <div className="fixed inset-0 bg-foreground/30 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl border border-border/60 shadow-card max-h-[90vh] overflow-y-auto">
@@ -156,6 +172,17 @@ function SchoolDetailPanel({ school, onClose, onEdit, onToggleStatus }: {
             </span>
             <span className={`px-2.5 py-1 rounded-lg text-xs font-700 capitalize ${sb.bg} ${sb.text}`}>{school.subscription}</span>
             <span className="px-2.5 py-1 rounded-lg text-xs font-700 bg-border/30 text-muted">{school.board}</span>
+            <button
+              onClick={onChangeTheme}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-700 bg-violet-50 text-violet-700 hover:bg-violet-100 transition-colors"
+            >
+              <div
+                className="w-2.5 h-2.5 rounded-full flex-shrink-0 border border-white shadow-sm"
+                style={{ background: `linear-gradient(135deg, ${th.vars['--theme-hero-from']}, ${th.vars['--theme-hero-to']})` }}
+              />
+              {th.name} Theme
+              <Icon name="ChevronDown" size={10} />
+            </button>
           </div>
 
           {/* Key stats */}
@@ -196,13 +223,21 @@ function SchoolDetailPanel({ school, onClose, onEdit, onToggleStatus }: {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-2 pt-1 flex-wrap">
             <button
               onClick={onEdit}
               className="flex-1 py-2.5 bg-rose-500 text-white text-sm font-700 rounded-xl hover:bg-rose-600 transition-colors flex items-center justify-center gap-2"
             >
               <Icon name="Pencil" size={14} />Edit School
             </button>
+            <a
+              href={`/?school=${school.code.toLowerCase()}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-700 rounded-xl hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2"
+            >
+              <Icon name="Globe" size={14} />View Website
+            </a>
             <button
               onClick={onToggleStatus}
               className={`flex-1 py-2.5 text-sm font-700 rounded-xl transition-colors border flex items-center justify-center gap-2 ${
@@ -390,6 +425,7 @@ export default function SuperAdminSchools() {
   const [modal, setModal] = useState<'add' | 'edit' | 'delete' | null>(null);
   const [editTarget, setEditTarget] = useState<School | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<School | null>(null);
+  const [themeTarget, setThemeTarget] = useState<School | null>(null);
 
   const filtered = useMemo(() => {
     return schools.filter(s => {
@@ -418,6 +454,11 @@ export default function SuperAdminSchools() {
         : sc
     ));
     setViewSchool(null);
+  };
+
+  const updateTheme = (schoolId: number, themeId: ThemeId) => {
+    setSchools(prev => prev.map(sc => sc.id === schoolId ? { ...sc, theme: themeId } : sc));
+    setThemeTarget(null);
   };
 
   // Summary numbers
@@ -517,6 +558,7 @@ export default function SuperAdminSchools() {
                 <th className="text-left px-4 py-3.5 text-xs font-700 text-muted uppercase tracking-wide">Status</th>
                 <th className="text-left px-4 py-3.5 text-xs font-700 text-muted uppercase tracking-wide hidden lg:table-cell">Enrollment</th>
                 <th className="text-left px-4 py-3.5 text-xs font-700 text-muted uppercase tracking-wide hidden lg:table-cell">Plan</th>
+                <th className="text-left px-4 py-3.5 text-xs font-700 text-muted uppercase tracking-wide hidden xl:table-cell">Theme</th>
                 <th className="text-left px-4 py-3.5 text-xs font-700 text-muted uppercase tracking-wide hidden xl:table-cell">Last Active</th>
                 <th className="text-right px-5 py-3.5 text-xs font-700 text-muted uppercase tracking-wide">Actions</th>
               </tr>
@@ -577,6 +619,27 @@ export default function SuperAdminSchools() {
                       <span className={`px-2.5 py-1 rounded-lg text-xs font-700 capitalize ${sb.bg} ${sb.text}`}>{s.subscription}</span>
                     </td>
 
+                    {/* Theme */}
+                    <td className="px-4 py-4 hidden xl:table-cell">
+                      {(() => {
+                        const t = getTheme(s.theme);
+                        return (
+                          <button
+                            onClick={() => setThemeTarget(s)}
+                            title="Change website theme"
+                            className="flex items-center gap-1.5 group/theme hover:opacity-80 transition-opacity"
+                          >
+                            <div
+                              className="w-4 h-4 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                              style={{ background: `linear-gradient(135deg, ${t.vars['--theme-hero-from']}, ${t.vars['--theme-hero-to']})` }}
+                            />
+                            <span className="text-xs font-700 text-foreground">{t.name}</span>
+                            <Icon name="ChevronDown" size={11} className="text-muted group-hover/theme:text-rose-500" />
+                          </button>
+                        );
+                      })()}
+                    </td>
+
                     {/* Last active */}
                     <td className="px-4 py-4 hidden xl:table-cell text-xs text-muted">{s.lastActive}</td>
 
@@ -590,12 +653,28 @@ export default function SuperAdminSchools() {
                         >
                           <Icon name="Eye" size={14} />
                         </button>
+                        <a
+                          href={`/?school=${s.code.toLowerCase()}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="View school website"
+                          className="p-1.5 rounded-lg text-muted hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                        >
+                          <Icon name="Globe" size={14} />
+                        </a>
                         <button
                           onClick={() => openEdit(s)}
                           title="Edit school"
                           className="p-1.5 rounded-lg text-muted hover:text-rose-600 hover:bg-rose-50 transition-colors"
                         >
                           <Icon name="Pencil" size={14} />
+                        </button>
+                        <button
+                          onClick={() => setThemeTarget(s)}
+                          title="Change website theme"
+                          className="p-1.5 rounded-lg text-muted hover:text-violet-600 hover:bg-violet-50 transition-colors"
+                        >
+                          <Icon name="Palette" size={14} />
                         </button>
                         <button
                           onClick={() => toggleStatus(s)}
@@ -646,6 +725,7 @@ export default function SuperAdminSchools() {
           onClose={() => setViewSchool(null)}
           onEdit={() => openEdit(viewSchool)}
           onToggleStatus={() => toggleStatus(viewSchool)}
+          onChangeTheme={() => { setThemeTarget(viewSchool); setViewSchool(null); }}
         />
       )}
 
@@ -659,6 +739,7 @@ export default function SuperAdminSchools() {
                   state: editTarget.state, board: editTarget.board, status: editTarget.status,
                   principal: editTarget.principal, principalEmail: editTarget.principalEmail,
                   email: editTarget.email, phone: editTarget.phone, subscription: editTarget.subscription,
+                  theme: editTarget.theme, domain: editTarget.domain,
                 }
               : EMPTY_FORM
           }
@@ -668,10 +749,12 @@ export default function SuperAdminSchools() {
               const newSchool: School = {
                 ...data,
                 id: Date.now(),
+                domain: data.domain || `${data.code.toLowerCase().replace(/[^a-z0-9]/g, '')}.schoolsync.in`,
                 students: 0,
                 teachers: 0,
                 established: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
                 lastActive: 'Never',
+                theme: (data.theme as ThemeId) ?? 'aurora',
               };
               setSchools(prev => [newSchool, ...prev]);
             } else if (editTarget) {
@@ -692,6 +775,15 @@ export default function SuperAdminSchools() {
             setModal(null);
             setDeleteTarget(null);
           }}
+        />
+      )}
+
+      {themeTarget && (
+        <ThemePicker
+          schoolName={themeTarget.name}
+          currentTheme={themeTarget.theme}
+          onSelect={(themeId) => updateTheme(themeTarget.id, themeId)}
+          onClose={() => setThemeTarget(null)}
         />
       )}
     </div>
